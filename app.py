@@ -1,3 +1,4 @@
+from crypt import methods
 import json
 import os
 import uuid
@@ -44,6 +45,29 @@ def upload_file():
     flash('Upload succeeded')
     return redirect(url_for('upload_file'))
  
+
+
+
+@app.route('/upload_images', methods=['GET', 'POST'])
+def upload_images():
+    upload_files = request.files.getlist('file')
+    app.logger.info(upload_files)
+
+    for file in upload_files:
+        original_filename = file.filename
+        extension = original_filename.rsplit('.', 1)[1].lower()
+        filename = str(uuid.uuid1()) + '.' + extension
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        file_list = os.path.join(UPLOAD_FOLDER, 'files.json')
+        files = _get_files()
+        files[filename] = original_filename
+        with open(file_list, 'w') as fh:
+            json.dump(files, fh)
+
+    return {'mensagem':'Upload efetuado com sucesso!'}
+
+ 
+
  
 @app.route('/download/<code>', methods=['GET'])
 def download(code):
@@ -64,3 +88,6 @@ def _get_files():
         with open(file_list) as fh:
             return json.load(fh)
     return {}
+
+if __name__ == '__main__':
+    app.run(Debung=True)
